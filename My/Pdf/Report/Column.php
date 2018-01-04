@@ -163,7 +163,7 @@ class My_Pdf_Report_Column
 					switch ($this->_formatPattern[0]) {
 						case 'date': $result['value'] = date($this->_formatPattern[1], strtotime($result['value']));
 									break;
-						case 'boolean' : $result['value'] = ($result['value']) ? $this->_formatPattern[1] : $this->_formatPattern[2];
+						case 'boolean' : $result['value'] = ($result['value']) ? $this->_formatPattern[1] : (isset($this->_formatPattern[2]) ? $this->_formatPattern[2] : '');
 									break;
 					}
 				}

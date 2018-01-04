@@ -52,6 +52,13 @@ class My_Pdf_Table_Column_Style extends Zend_Pdf_Style
 		return $this->_border;
 	}
 	
+	public function removeBorder($position=null)
+	{
+		if ($position!==null) {
+			if (isset($this->_border[$position])) unset($this->_border[$position]);
+		} else $this->_border = array();
+	}
+	
 	public function setTextLineSpacing($textLineSpacing)
 	{
 		$this->_textLineSpacing = $textLineSpacing;

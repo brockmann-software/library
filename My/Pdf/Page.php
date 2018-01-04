@@ -38,6 +38,8 @@ class My_Pdf_Page extends Zend_Pdf_Page {
 	 * @param array(TOP,RIGHT,BOTTOM,LEFT)
 	 */
 	public function setMargins($margin=array()){
+		foreach ($margin as $key => &$value) $value = $this->scaleToPixel($value);
+		unset($value);
 		$this->_margin=$margin;
 	}
 	
@@ -93,7 +95,18 @@ class My_Pdf_Page extends Zend_Pdf_Page {
 		$this->_charEncoding = $charEncoding;
 	}
 	
-	public function __construct($param1, $param2 = null, $param3 = null){
+	public function __construct($param1, $param2 = null, $param3 = null, $param4 = null){
+		if ($param4!==null) {
+			if (is_string($param4)) $this->_charEncoding = $param4; else throw new Zend_Pdf_Exception('Wrong format for 4th param!');
+		} 
+		if ($param3!==null && is_string($param3)) {
+			$this->_charEncoding = $param3;
+			$param3 = null;
+		} 
+		if ($param2!==null && is_string($param2)) {
+			$this->_charEncoding = $param2;
+			$param2 = null;
+		}
 		parent::__construct ( $param1, $param2, $param3 );
 		
 		$style=new Zend_Pdf_Style();
@@ -108,7 +121,7 @@ class My_Pdf_Page extends Zend_Pdf_Page {
 		
 		$this->_defaultStyle=$style;
 		$this->setStyle($style);
-		if ($param1 instanceof My_Pdf_Page) $this->_charEncoding = $param1->_charEncoding; else $this->_charEncoding = '';
+		if ($param1 instanceof My_Pdf_Page) $this->_charEncoding = $param1->_charEncoding;
 	}
 	
 	/**
@@ -120,6 +133,8 @@ class My_Pdf_Page extends Zend_Pdf_Page {
 	 */
 	public function addTable(My_Pdf_Table $table,$posX,$posY,$inContentArea=true){
 		//render table --> check for new pages
+		$posX = $this->scaleToPixel($posX);
+		$posY = $this->scaleToPixel($posY);
 		$pages=$table->render($this,$posX,$posY,$inContentArea);
 		if(is_array($pages))
 			$this->_pages+=$pages;
@@ -155,6 +170,11 @@ class My_Pdf_Page extends Zend_Pdf_Page {
 	 * @param bool $inContentArea
 	 */
 	public function drawLine($x1,$y1,$x2,$y2,$inContentArea=true){
+		$y1 = $this->scaleToPixel($y1);
+		$x1 = $this->scaleToPixel($x1);
+		$y2 = $this->scaleToPixel($y2);
+		$x2 = $this->scaleToPixel($x2);
+		
 		//move origin
 		if($inContentArea){
 			$y1 = $this->getHeight()- $y1  - $this->getMargin(My_Pdf::TOP);
@@ -166,6 +186,26 @@ class My_Pdf_Page extends Zend_Pdf_Page {
 		parent::drawLine($x1,$y1,$x2,$y2);
 	}
 	
+	private function scaleToPixel($value)
+	{
+		$saclePixel = 0;
+		if (is_numeric($value)) $saclePixel = $value;
+		elseif (is_array($value)) {
+			if (!is_numeric($value[0])) throw new Zend_Pdf_Exception('First param of height has to be numeric');
+			switch (strtoupper($value[1])) {
+				case 'CM': $saclePixel = ($value[0]*72/2.54);
+					break;
+				case 'IN': $saclePixel = ($value[0]*72);
+					break;
+				case 'MM': $saclePixel = ($value[0]*72/25.40);
+					break;
+				case 'PX': $saclePixel = $value[0];
+				default: throw new Zend_Pdf_Exception('This scale unit is not supported!');
+			}
+		}
+		return $saclePixel;
+	}
+	
 	/**
 	 * Draw Text
 	 *
@@ -174,10 +214,13 @@ class My_Pdf_Page extends Zend_Pdf_Page {
 	 * @param int $y1
 	 * @param string $charEncoding
 	 * @param bool $inContentArea
+	 * @param int $alignment
 	 */
 	public function drawText($text,$x1,$y1,$charEncoding="",$inContentArea=true, $alignment=My_Pdf::LEFT){
 		//move origin
-		if ($charEncoding=='') $charEncoding = $this->_charEncoding;
+		$y1 = $this->scaleToPixel($y1);
+		$x1 = $this->scaleToPixel($x1);
+		if ($charEncoding==='') $charEncoding = $this->_charEncoding;
 		if($inContentArea){
 			$y1 = $this->getHeight()- $y1  - $this->getMargin(My_Pdf::TOP);
 			$x1 = $x1  + $this->getMargin(My_Pdf::LEFT);
@@ -188,7 +231,7 @@ class My_Pdf_Page extends Zend_Pdf_Page {
 		
 		$textProperties = $this->getTextProperties($text);
 		switch ($alignment) {
-			case My_Pdf::RIGHT: $x1 = $x1-$textProperties['max_width'];
+			case My_Pdf::RIGHT:	$x1 = $x1-$textProperties['max_width'];
 				break;
 			case My_Pdf::CENTER: $x1 = $x1-round($textProperties['max_width']/2);
 		}
@@ -207,6 +250,10 @@ class My_Pdf_Page extends Zend_Pdf_Page {
 	 * @param bool $inContentArea
 	 */
 	public function drawRectangle($x1,$y1,$x2,$y2,$filltype=null,$inContentArea=true){
+		$y1 = $this->scaleToPixel($y1);
+		$x1 = $this->scaleToPixel($x1);
+		$y2 = $this->scaleToPixel($y2);
+		$x2 = $this->scaleToPixel($x2);
 		//move origin
 		if($inContentArea){
 			$y1 = $this->getHeight()- $y1  - $this->getMargin(My_Pdf::TOP);
@@ -218,13 +265,26 @@ class My_Pdf_Page extends Zend_Pdf_Page {
 		parent::drawRectangle($x1,$y1,$x2,$y2,$filltype);
 	}
 	
-	public function drawImage(Zend_Pdf_Resource_Image $image,$x1,$y1,$width,$height,$inContentArea=true){
+	public function drawImage(Zend_Pdf_Resource_Image $image,$x1,$y1,$width=null,$height=null,$inContentArea=true){
+		$y1 = $this->scaleToPixel($y1);
+		$x1 = $this->scaleToPixel($x1);
+		if ($width!==null) $recommendedWidth = $this->scaleToPixel($width);
+		else $recommendedWidth = $image->getPixelWidth();
+		if ($height!==null) $recommendedHeight = $this->scaleToPixel($height);
+		else $recommendedHeight = $image->getPixelHeight();
+		if ($height!==null && $width===null) {
+			$recommendedWidth=$this->scaleToPixel($height)/$image->getPixelHeight()*$image->getPixelWidth();
+		} elseif ($width!==null && $height===null) {
+			$recommendedHeight=$this->scaleToPixel($width)/$image->getPixelWidth()*$image->getPixelHeight();
+		}
+//		Zend_Registry::get('logger')->info("Bildhöhe: {$image->getPixelHeight()} Bildbreite: {$image->getPixelWidth()} Höhe: {$this->scaleToPixel($height)} Breite: {$this->scaleToPixel($width)} Neue Höhe: $recommendedHeight neue Breite: $recommendedWidth");
 		if($inContentArea){
-			$y1 = $this->getHeight()- $y1  - $this->getMargin(My_Pdf::TOP)-$height;
+			
+			$y1 = $this->getHeight()- $y1  - $this->getMargin(My_Pdf::TOP)-$recommendedHeight;
 			$x1 = $x1  + $this->getMargin(My_Pdf::LEFT);
 			
-			$y2=$y1+$height;
-			$x2=$x1+$width;
+			$y2=$y1+$recommendedHeight;
+			$x2=$x1+$recommendedWidth;
 		}
 		parent::drawImage($image,$x1,$y1,$x2,$y2);
 	}
@@ -248,7 +308,20 @@ class My_Pdf_Page extends Zend_Pdf_Page {
 	 * @param string $text
 	 * @return int $width
 	 */
-	private function _getTextWidth($text) {
+	private function _getTextWidth($text)
+	{
+//		$drawing_text = iconv('', 'UTF-8', $text);
+		$characters    = array();
+		for ($i = 0; $i < strlen($text); $i++) {
+			$characters[] = ord ($text[$i]);
+		}
+		$glyphs        = $this->_font->glyphNumbersForCharacters($characters);
+		$widths        = $this->_font->widthsForGlyphs($glyphs);
+		$text_width   = (array_sum($widths) / $this->_font->getUnitsPerEm()) * $this->_fontSize;
+		return $text_width;
+	}
+
+	private function _oldTextWidth($text) {
 		
 		$glyphs = array ();
 		$em = $this->_font->getUnitsPerEm ();

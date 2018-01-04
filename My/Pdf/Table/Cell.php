@@ -214,6 +214,10 @@ class My_Pdf_Table_Cell {
 		unset($this->_border[$position]);
 	}
 	
+	public function removeBorders() {
+		$this->_borders = array();
+	}
+	
 	/**
 	 * Set Font and Size
 	 *
@@ -346,7 +350,7 @@ class My_Pdf_Table_Cell {
 		$this->_image['filename']=$filename;
 		
 		if($scale>1)
-			throw new Zend_Exception("Scale must be between (0,1]","My_Pdf_Table_Cell::addImage()");
+			throw new Zend_Exception("Scale must be between (0,1)","My_Pdf_Table_Cell::addImage()");
 		$this->_image['scale']=$scale;
 		
 		$this->_align=$align;
@@ -407,7 +411,7 @@ class My_Pdf_Table_Cell {
 					$height=$text_props['height'];
 				}
 				$this->_recommendedHeight = $height+($this->_padding[My_Pdf::TOP]+$this->_padding[My_Pdf::BOTTOM]);
-			}
+			} else $this->_recommendedHeight = $this->_height;
 			
 			//store text props;
 			$this->_text['width']=$text_props['text_width'];

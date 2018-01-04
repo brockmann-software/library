@@ -23,7 +23,7 @@ class My_Pdf_Report_Group
 	private $_headerStyle = null;
 	
 	//@var My_Pdf_Column_Style: style of the footer columns
-	private $_FooterStyle = null;
+	private $_footerStyle = null;
 	
 	private $_forceNewPage = false;
 	
@@ -97,7 +97,7 @@ class My_Pdf_Report_Group
 	// get the attribute forceNewPage
 	public function getForceNewPage()
 	{
-		Zend_Registry::get('logger')->info("Neue Seite: {$this->_forceNewPage} Gedruckt: {$this->countPrinted}");
+	//	Zend_Registry::get('logger')->info("Neue Seite: {$this->_forceNewPage} Gedruckt: {$this->countPrinted}");
 		return $this->_forceNewPage && ($this->countPrinted>1);
 	}
 	
