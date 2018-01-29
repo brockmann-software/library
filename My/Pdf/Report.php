@@ -171,8 +171,33 @@ class My_Pdf_Report extends My_Pdf_Document
 		return $headerRow;
 	}
 	
+	public function buildEmptyRow($dataArray)
+	{
+		$columns = array();
+		if (is_array($this->_columns)) {
+			foreach ($this->_columns as $column) {
+				$col = new My_Pdf_Table_Column();
+				$col->setWidth($column->getWidth());
+				$col->setText(' ');
+				$col->setStyle($column->getBodyStyle());
+				$columns[] = $col;
+			}
+		} else {
+			foreach ($dataArray as $key => $value) {
+				$col = new My_Pdf_Report_Column();
+				$col->setText(' ');
+				$columns[] = $col;
+			}
+		}
+		$bodyRow = new My_Pdf_Table_Row();
+		$bodyRow->setColumns($columns);
+		return $bodyRow;
+	}
+				
+			
 	public function buildGroupFooterRow($group, $dataArray)
 	{
+		
 		$columns = array();
 		if (is_array($this->_columns)) {
 			$colSpan = 0;
@@ -265,8 +290,11 @@ class My_Pdf_Report extends My_Pdf_Document
 			$groupsEnded = $this->getGroupsEnded($dataArray);
 			if (count($groupsEnded)>0) {
 				$groupsEndedReverse = array_reverse($groupsEnded, true);
-				if ($row>0) foreach ($groupsEndedReverse as $key => $group)
+				if ($row>0) foreach ($groupsEndedReverse as $key => $group) {
+					for ($empty = 0; $empty<$group->getEmptyLinesBefore(); $empty++) $table->addRow($this->buildEmptyRow($dataArray));
 					$table->addRow($this->buildGroupFooterRow($group, $dataArray));
+					for ($empty = 0; $empty<$group->getEmptyLinesAfter(); $empty++) $table->addRow($this->buildEmptyRow($dataArray));
+				}
 				foreach ($groupsEnded as $group) {
 					$group->resetColumns($dataArray);
 					$table->addRow($this->buildGroupHeaderRow($group, $dataArray));
@@ -276,8 +304,11 @@ class My_Pdf_Report extends My_Pdf_Document
 			$table->addRow($this->buildBodyRow($dataArray));
 		}
 		$groupsEndedReverse = array_reverse($this->_groups);
-		foreach ($groupsEndedReverse as $group)
+		foreach ($groupsEndedReverse as $group) {
+			for ($empty = 0; $empty<$group->getEmptyLinesBefore(); $empty++) $table->addRow($this->buildEmptyRow($dataArray));
 			$table->addRow($this->buildGroupFooterRow($group, $dataArray));
+			for ($empty = 0; $empty<$group->getEmptyLinesAfter(); $empty++) $table->addRow($this->buildEmptyRow($dataArray));
+		}
 		return $table;
 	}
 	

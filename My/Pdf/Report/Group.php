@@ -27,6 +27,10 @@ class My_Pdf_Report_Group
 	
 	private $_forceNewPage = false;
 	
+	private $_emptyLinesBefore = 0;
+	
+	private $_emptyLinesAfter = 0;
+	
 	//@reference of the report
 	private $_report;
 	
@@ -99,6 +103,23 @@ class My_Pdf_Report_Group
 	{
 	//	Zend_Registry::get('logger')->info("Neue Seite: {$this->_forceNewPage} Gedruckt: {$this->countPrinted}");
 		return $this->_forceNewPage && ($this->countPrinted>1);
+	}
+	
+	public function getEmptyLinesBefore()
+	{
+		return $this->_emptyLinesBefore;
+	}
+	
+	public function getEmptyLinesAfter()
+	{
+		return $this->_emptyLinesAfter;
+	}
+	
+	public function setEmptyLines($lines, $position)
+	{
+		if ($position==0) $this->_emptyLinesBefore = $lines;
+		elseif ($position==1) $this->_emptyLinesAfter = $lines;
+		else throw new Exception('position is not valid!');
 	}
 	
 	//sets the style for the entire footer
