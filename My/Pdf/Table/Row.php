@@ -334,6 +334,7 @@ class My_Pdf_Table_Row {
 			}
 			$col->setWidth($width);
 		}
+		Zend_Registry::get('logger')->info('Berechnung verbundene Zellen fertig  nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
 
 		//render cols sepeately (without dummy cells)
 		foreach($this->_cols as $key=>$col) {
@@ -347,6 +348,7 @@ class My_Pdf_Table_Row {
 			}
 			
 			$col->render($page, $x, $posY);
+			Zend_Registry::get('logger')->info('Zelle fertig  nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
 			$x += $col->getWidth();
 		}
 	}

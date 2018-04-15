@@ -54,6 +54,7 @@ class My_Pdf_Table {
 	 */
 	public function render(My_Pdf_Page $page, $posX,$posY,$inContentArea=true){
 
+		Zend_Registry::get('logger')->info('Tabelle startet nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
 		if($this->_headerRow && $this->_rows){
 			//set header in front of rows
 			$this->_rows=array_merge($this->_headerRow,$this->_rows);
@@ -62,7 +63,7 @@ class My_Pdf_Table {
 			//no rows in this table, just the header
 			$this->_rows=$this->_headerRow;
 		}
-
+		Zend_Registry::get('logger')->info('Tabellenkopf fertig  nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
 		if($inContentArea){
 			$start_y=$posY + $page->getMargin(My_Pdf::TOP);
 			$max_y=$page->getHeight()- $page->getMargin(My_Pdf::BOTTOM)- $page->getMargin(My_Pdf::TOP);
@@ -77,6 +78,7 @@ class My_Pdf_Table {
 		$y=$start_y;
 		//prerender
 		$this->_preRender($page, $posX,$posY,$inContentArea);
+		Zend_Registry::get('logger')->info('Pre-Render fertig  nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
 		foreach($this->_rows as $row) {
 			//check current position (height)
 			$test=($y+$row->getHeight());
@@ -102,8 +104,9 @@ class My_Pdf_Table {
 
 			$row->render($page, $posX, $y);
 			$y += $row->getHeight()+$row->getBorderLineWidth(My_Pdf::BOTTOM);
+			Zend_Registry::get('logger')->info('Rendering Row fertig nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
 		}
-
+		Zend_Registry::get('logger')->info('Tabelle fertig  nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
 		return $this->_pages;
 	}
 

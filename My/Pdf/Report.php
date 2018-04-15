@@ -8,6 +8,7 @@ class My_Pdf_Report extends My_Pdf_Document
 	const BETWEEN_INCL	= 4;
 	const GREATER_EQUAL	= 5;
 	const GREATER		= 6;
+	const NOT_EQUAL 	= 7;
 	
 	//array of assosiative array with column=>value paars;
 	private $_rowset;
@@ -29,6 +30,7 @@ class My_Pdf_Report extends My_Pdf_Document
 
 	
 	public function __construct($filename, $path, array $dataset, $pageSize, $charEncoding){
+		Zend_Registry::get('logger')->info('Bericht wird inizialisiert nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
 		$this->_rowset = $dataset;
 		$this->_pageSize = $pageSize;
 
@@ -57,6 +59,7 @@ class My_Pdf_Report extends My_Pdf_Document
 
 		parent::__construct($filename, $path);
 		$this->setCharEncoding($charEncoding);
+		Zend_Registry::get('logger')->info('Bericht ist inizialisiert nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
 	}
 	
 	public function setColumns($columns)
@@ -285,6 +288,7 @@ class My_Pdf_Report extends My_Pdf_Document
 	private function buildTable()
 	{
 		$table = new My_Pdf_Table(2);
+		Zend_Registry::get('logger')->info('Bericht startet nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
 		$table->setHeader($this->buildHeaderRow());
 		foreach ($this->_rowset as $row => $dataArray) {
 			$groupsEnded = $this->getGroupsEnded($dataArray);
@@ -309,15 +313,21 @@ class My_Pdf_Report extends My_Pdf_Document
 			$table->addRow($this->buildGroupFooterRow($group, $dataArray));
 			for ($empty = 0; $empty<$group->getEmptyLinesAfter(); $empty++) $table->addRow($this->buildEmptyRow($dataArray));
 		}
+		Zend_Registry::get('logger')->info('Bericht fertig  nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
 		return $table;
 	}
 	
 	public function save()
 	{
+		
 		$page = $this->createPage($this->_pageSize);
-		$page->addTable($this->buildTable(), 0, 0);
+		$table = $this->buildTable();
+		Zend_Registry::get('logger')->info('Bericht übergeben nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
+		$page->addTable($table, 0, 0);
+		Zend_Registry::get('logger')->info('Bericht eingefügt nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
 		$this->addPage($page);
 		parent::save();
+		Zend_Registry::get('logger')->info('Bericht gespeichert nach '.print_r(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"], true));
 	}
 	
 	public function getColumn($columnName)

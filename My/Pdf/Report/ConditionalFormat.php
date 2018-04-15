@@ -41,6 +41,8 @@ class My_Pdf_Report_ConditionalFormat
 													break;
 			case My_Pdf_Report::EQUAL:				$result = ($value=$this->_checkValue);
 													break;
+			case My_Pdf_Report::NOT_EQUAL:			$result = ($value!=$this->_checkValue);
+													break;
 			case My_Pdf_Report::BETWEEN:			$result = ($value>$this-_checkValue && $value<$this->_checkValue);
 													break;
 			case My_Pdf_Report::BETWEEN_INCL:		$result = ($value>=$this-_checkValue && $value<=$this->_checkValue);
